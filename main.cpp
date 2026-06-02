@@ -45,11 +45,8 @@ Config readConfig() {
             QJsonObject obj = doc.object();
             
             if (obj.contains("folder_path")) {
-                QString path = obj["folder_path"].toString();
-                if (QDir(path).exists()) {
-                    qDebug() << "Loaded config from:" << configPath;
-                    qDebug() << "Folder path:" << path;
-                    return path;
+                cfg.startPath = obj["folder_path"].toString();
+	    }
                 }
             }
         }
