@@ -1,5 +1,9 @@
 # CloudBrowser
-A browser for folders connected to protondrive
+I am designing a browser to display only the folders that are connected (via rclone) to ProtonDrive.
+
+## General purpose
+This is a browser that displays only a customized set list of folders. The rest of folders exist but are not 
+displayed with this program.
 
 ### Requirements
 Read [requirements.md](requirements.md)
@@ -42,6 +46,16 @@ and inside repo
 ```bash
 cd CloudBrowser/
 qmake
+make
+./FolderBrowser
+```
+
+### Develop mode
+
+Modify `main.cpp` and run:
+```bash
+make clean
+qmake6
 make
 ./FolderBrowser
 ```
