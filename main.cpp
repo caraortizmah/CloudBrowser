@@ -47,6 +47,21 @@ Config readConfig() {
             if (obj.contains("folder_path")) {
                 cfg.startPath = obj["folder_path"].toString();
 	    }
+            
+            if (obj.contains("intercept_folders") && obj["intercept_folders"].isArray()) {
+                QJsonArray arr = obj["intercept_folders"].toArray();
+                for (const auto& val : arr) {
+                    cfg.interceptedFolders << val.toString();
+                }
+            }
+            
+            if (obj.contains("custom_list_file")) {
+                cfg.customListFilePath = obj["custom_list_file"].toString();
+            }
+        }
+    }
+    
+    return cfg;
                 }
             }
         }
