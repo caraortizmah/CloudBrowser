@@ -171,10 +171,20 @@ int main(int argc, char *argv[]) {
         } else {
             statusLabel->setText("Cannot access: " + path);
         }
-    };
+    }
     
-    // Set initial directory
-    changeDirectory(startPath);
+    // Function to change directory with interception logic
+    void changeDirectory(const QString& path) {
+        QDir targetDir(path);
+        QString canonicalPath = targetDir.canonicalPath();
+        
+        // Check if we should intercept this folder
+        if (shouldIntercept(canonicalPath)) {
+            enterCustomMode(canonicalPath);
+        } else {
+            enterNormalMode(canonicalPath);
+        }
+    }
     
     // Connect signals
     QObject::connect(view, &QListView::doubleClicked, [&](const QModelIndex &index) {
