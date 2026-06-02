@@ -103,7 +103,6 @@ int main(int argc, char *argv[]) {
     
     // List view widget
     QListView *view = new QListView();
-    view->setModel(model);
     // Set the view to show icons like a file manager
     view->setViewMode(QListView::IconMode);
     // Adjust layout when window is resized
@@ -129,30 +128,44 @@ int main(int argc, char *argv[]) {
     // Place the view inside the main window
     // Navigation widgets
     QLineEdit *pathBar = new QLineEdit();
-    pathBar->setText(startPath);
     
     QPushButton *goButton = new QPushButton("Go");
     QPushButton *upButton = new QPushButton("Up");
     QLabel *statusLabel = new QLabel("Ready");
-    //    A QMainWindow requires a central widget.
-    //  Using Layout
-    QWidget *centralWidget = new QWidget();
-    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
-    QHBoxLayout *navLayout = new QHBoxLayout();
     
-    navLayout->addWidget(upButton);
-    navLayout->addWidget(pathBar);
-    navLayout->addWidget(goButton);
+    // Track current path and whether we're in "custom mode"
+    QString currentPath = cfg.startPath;
+    bool isCustomMode = false;
+    QStringList customFolders;
     
-    mainLayout->addLayout(navLayout);
-    mainLayout->addWidget(view);
-    mainLayout->addWidget(statusLabel);
+    // Function to check if a folder should be intercepted
+    bool shouldIntercept(const QString& folderPath) {
+        QString folderName = QDir(folderPath).dirName();
+        return cfg.interceptedFolders.contains(folderName);
+    }
     
-    // Function to change directory
-    auto changeDirectory = [&](const QString &path) {
-        QModelIndex idx = model->index(path);
+    // Function to switch to custom view
+    void enterCustomMode(const QString& path) {
+        customFolders = readCustomFolderList(cfg.customListFilePath);
+        QStringListModel *model = qobject_cast<QStringListModel*>(customModel);
+        if (model) {
+            model->setStringList(customFolders);
+        }
+        view->setModel(customModel);
+        isCustomMode = true;
+        currentPath = path;
+        pathBar->setText(path + " [CUSTOM VIEW]");
+        statusLabel->setText(QString("Custom view: showing %1 folders from list").arg(customFolders.size()));
+    }
+    
+    // Function to switch to normal filesystem view
+    void enterNormalMode(const QString& path) {
+        QModelIndex idx = fsModel->index(path);
         if (idx.isValid()) {
+            view->setModel(fsModel);
             view->setRootIndex(idx);
+            isCustomMode = false;
+            currentPath = path;
             pathBar->setText(path);
             statusLabel->setText("Browsing: " + path);
         } else {
