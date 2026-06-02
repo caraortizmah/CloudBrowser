@@ -1,3 +1,5 @@
 {
-    "folder_path": "/media/rclone_mount_folder"
+    "folder_path": "/media/rclone_mount_folder",
+    "intercept_folders": ["Documents", "Pictures"],
+    "custom_list_file": "~/.config/folderbrowser/folders.txt"
 }
