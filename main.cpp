@@ -24,11 +24,16 @@ struct Config {
     QStringList interceptedFolders;  // Folder names that trigger custom view
     QString customListFilePath;       // File containing custom folder list
 };
-QString readConfigPath() {
+Config readConfig() {
     // Look for config file in several locations
+    Config cfg;
+    
+    // Default values
+    cfg.startPath = QDir::homePath();
+    cfg.customListFilePath = QDir::homePath() + "/.config/folderbrowser/folders.txt";
+    
     QStringList configPaths = {
         QDir::homePath() + "/.config/folderbrowser/config.json",
-        QDir::homePath() + "/folderbrowser_config.json",
         QCoreApplication::applicationDirPath() + "/config.json"
     };
     
