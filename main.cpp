@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     
     // Create the main window
     QMainWindow mainWindow;
-    mainWindow.setWindowTitle("Folder Broser for proton - " + startPath);
+    mainWindow.setWindowTitle("Folder Broser for proton ");
     mainWindow.resize(800, 600);
 
     // Real file system model (for normal browsing)
@@ -109,23 +109,6 @@ int main(int argc, char *argv[]) {
     view->setResizeMode(QListView::Adjust);
     view->setGridSize(QSize(100, 100));
     view->setIconSize(QSize(64, 64));
-
-    // Set the root index of the view to the user's home directory
-    //    This ensures the view starts inside the home folder, not the entire system root.
-    QModelIndex rootIndex = model->index(startPath);
-    
-    if (!rootIndex.isValid()) {
-        QMessageBox::warning(&mainWindow, "Error", 
-            "Cannot access folder:\n" + startPath + 
-            "\n\nFalling back to home directory.");
-        startPath = QDir::homePath();
-        rootIndex = model->index(startPath);
-        mainWindow.setWindowTitle("Folder Browser - " + startPath);
-    }
-    
-    view->setRootIndex(rootIndex);
-
-    // Place the view inside the main window
     // Navigation widgets
     QLineEdit *pathBar = new QLineEdit();
     
