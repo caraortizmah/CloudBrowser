@@ -3,6 +3,7 @@
 #include <QFileSystemModel>
 #include <QListView>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QWidget>
 #include <QDir>
 #include <QFile>
@@ -10,6 +11,9 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QMessageBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLabel>
 
 QString readConfigPath() {
     // Look for config file in several locations
@@ -51,12 +55,14 @@ int main(int argc, char *argv[]) {
     // Create the main window
     QMainWindow mainWindow;
     mainWindow.setWindowTitle("Folder Broser for proton - " + startPath);
+    mainWindow.resize(800, 600);
 
     // Create the file system model
     QFileSystemModel *model = new QFileSystemModel();
 
     // Set the root path to watch (user's home directory)
     model->setRootPath(startPath);
+    model->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
 
     // Create the list view and set the model
     QListView *view = new QListView();
@@ -65,6 +71,8 @@ int main(int argc, char *argv[]) {
     view->setViewMode(QListView::IconMode);
     // Adjust layout when window is resized
     view->setResizeMode(QListView::Adjust);
+    view->setGridSize(QSize(100, 100));
+    view->setIconSize(QSize(64, 64));
 
     // Set the root index of the view to the user's home directory
     //    This ensures the view starts inside the home folder, not the entire system root.
@@ -82,6 +90,13 @@ int main(int argc, char *argv[]) {
     view->setRootIndex(rootIndex);
 
     // Place the view inside the main window
+    // Navigation widgets
+    QLineEdit *pathBar = new QLineEdit();
+    pathBar->setText(startPath);
+    
+    QPushButton *goButton = new QPushButton("Go");
+    QPushButton *upButton = new QPushButton("Up");
+    QLabel *statusLabel = new QLabel("Ready");
     //    A QMainWindow requires a central widget.
     QWidget *centralWidget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(centralWidget);
