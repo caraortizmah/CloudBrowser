@@ -69,16 +69,26 @@ int main(int argc, char *argv[]) {
     // Set the root index of the view to the user's home directory
     //    This ensures the view starts inside the home folder, not the entire system root.
     QModelIndex rootIndex = model->index(startPath);
+    
+    if (!rootIndex.isValid()) {
+        QMessageBox::warning(&mainWindow, "Error", 
+            "Cannot access folder:\n" + startPath + 
+            "\n\nFalling back to home directory.");
+        startPath = QDir::homePath();
+        rootIndex = model->index(startPath);
+        mainWindow.setWindowTitle("Folder Browser - " + startPath);
+    }
+    
     view->setRootIndex(rootIndex);
 
-    // 6. Place the view inside the main window
+    // Place the view inside the main window
     //    A QMainWindow requires a central widget.
     QWidget *centralWidget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(centralWidget);
     layout->addWidget(view);
-    mainWindow.setCentralWidget(centralWidget); // [citation:6]
+    mainWindow.setCentralWidget(centralWidget);
 
-    // 7. Show the window and start the event loop
+    // Show the window and start the event loop
     mainWindow.show();
     return app.exec();
 }
