@@ -63,13 +63,23 @@ Config readConfig() {
     
     return cfg;
                 }
+
+QStringList readCustomFolderList(const QString& filePath) {
+    QStringList folders;
+    QFile file(filePath);
+    
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream stream(&file);
+        while (!stream.atEnd()) {
+            QString line = stream.readLine().trimmed();
+            if (!line.isEmpty() && !line.startsWith("#")) {
+                folders << line;
             }
         }
+        file.close();
     }
     
-    // Fallback to home directory if config not found
-    qDebug() << "Config not found, using home directory";
-    return QDir::homePath();
+    return folders;
 }
 
 int main(int argc, char *argv[]) {
