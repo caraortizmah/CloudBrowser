@@ -43,30 +43,33 @@ QString readConfigPath() {
 }
 
 int main(int argc, char *argv[]) {
-    // 1. Create the Qt Application object
+    // Create the Qt Application object
     QApplication app(argc, argv);
 
-    // 2. Create the main window
+    QString startPath = readConfigPath();
+    
+    // Create the main window
     QMainWindow mainWindow;
-    mainWindow.setWindowTitle("Simple Folder Browser");
+    mainWindow.setWindowTitle("Folder Broser for proton - " + startPath);
 
-    // 3. Create the file system model
+    // Create the file system model
     QFileSystemModel *model = new QFileSystemModel();
-    // Set the root path to watch (user's home directory)
-    model->setRootPath(QDir::homePath());
 
-    // 4. Create the list view and set the model
+    // Set the root path to watch (user's home directory)
+    model->setRootPath(startPath);
+
+    // Create the list view and set the model
     QListView *view = new QListView();
     view->setModel(model);
     // Set the view to show icons like a file manager
-    view->setViewMode(QListView::IconMode); // [citation:4][citation:9]
+    view->setViewMode(QListView::IconMode);
     // Adjust layout when window is resized
-    view->setResizeMode(QListView::Adjust); // [citation:9]
+    view->setResizeMode(QListView::Adjust);
 
-    // 5. Set the root index of the view to the user's home directory
+    // Set the root index of the view to the user's home directory
     //    This ensures the view starts inside the home folder, not the entire system root.
-    QModelIndex rootIndex = model->index(QDir::homePath());
-    view->setRootIndex(rootIndex); // [citation:5]
+    QModelIndex rootIndex = model->index(startPath);
+    view->setRootIndex(rootIndex);
 
     // 6. Place the view inside the main window
     //    A QMainWindow requires a central widget.
