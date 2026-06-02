@@ -98,9 +98,56 @@ int main(int argc, char *argv[]) {
     QPushButton *upButton = new QPushButton("Up");
     QLabel *statusLabel = new QLabel("Ready");
     //    A QMainWindow requires a central widget.
+    //  Using Layout
     QWidget *centralWidget = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-    layout->addWidget(view);
+    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+    QHBoxLayout *navLayout = new QHBoxLayout();
+    
+    navLayout->addWidget(upButton);
+    navLayout->addWidget(pathBar);
+    navLayout->addWidget(goButton);
+    
+    mainLayout->addLayout(navLayout);
+    mainLayout->addWidget(view);
+    mainLayout->addWidget(statusLabel);
+    
+    // Function to change directory
+    auto changeDirectory = [&](const QString &path) {
+        QModelIndex idx = model->index(path);
+        if (idx.isValid()) {
+            view->setRootIndex(idx);
+            pathBar->setText(path);
+            statusLabel->setText("Browsing: " + path);
+        } else {
+            statusLabel->setText("Cannot access: " + path);
+        }
+    };
+    
+    // Set initial directory
+    changeDirectory(startPath);
+    
+    // Connect signals
+    QObject::connect(view, &QListView::doubleClicked, [&](const QModelIndex &index) {
+        QString path = model->filePath(index);
+        if (model->isDir(index)) {
+            changeDirectory(path);
+        }
+    });
+    
+    QObject::connect(goButton, &QPushButton::clicked, [&]() {
+        changeDirectory(pathBar->text());
+    });
+    
+    QObject::connect(upButton, &QPushButton::clicked, [&]() {
+        QDir current(pathBar->text());
+        current.cdUp();
+        changeDirectory(current.absolutePath());
+    });
+    
+    QObject::connect(pathBar, &QLineEdit::returnPressed, [&]() {
+        changeDirectory(pathBar->text());
+    });
+    
     mainWindow.setCentralWidget(centralWidget);
 
     // Show the window and start the event loop
