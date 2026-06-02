@@ -82,81 +82,53 @@ QStringList readCustomFolderList(const QString& filePath) {
     return folders;
 }
 
-int main(int argc, char *argv[]) {
-    // Create the Qt Application object
-    QApplication app(argc, argv);
+// Global pointers for access in callbacks (needed for lambda captures)
+QFileSystemModel *g_fsModel = nullptr;
+QStringListModel *g_customModel = nullptr;
+QListView *g_view = nullptr;
+QLineEdit *g_pathBar = nullptr;
+QLabel *g_statusLabel = nullptr;
+Config g_cfg;
+QString g_currentPath;
+bool g_isCustomMode = false;
+QStringList g_customFolders;
+    
+// Function declarations
+bool shouldIntercept(const QString& folderPath);
+void enterCustomMode(const QString& path);
+void enterNormalMode(const QString& path);
+void changeDirectory(const QString& path);
 
-    Config cfg = readConfig();
-    
-    // Create the main window
-    QMainWindow mainWindow;
-    mainWindow.setWindowTitle("Folder Broser for proton ");
-    mainWindow.resize(800, 600);
-
-    // Real file system model (for normal browsing)
-    QFileSystemModel *fsModel = new QFileSystemModel();
-    fsModel->setRootPath(cfg.startPath);
-    fsModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
-
-    // String list model (for custom folder lists)
-    QStringListModel *customModel = new QStringListModel();
-    
-    // List view widget
-    QListView *view = new QListView();
-    // Set the view to show icons like a file manager
-    view->setViewMode(QListView::IconMode);
-    // Adjust layout when window is resized
-    view->setResizeMode(QListView::Adjust);
-    view->setGridSize(QSize(100, 100));
-    view->setIconSize(QSize(64, 64));
-    // Navigation widgets
-    QLineEdit *pathBar = new QLineEdit();
-    
-    QPushButton *goButton = new QPushButton("Go");
-    QPushButton *upButton = new QPushButton("Up");
-    QLabel *statusLabel = new QLabel("Ready");
-    
-    // Track current path and whether we're in "custom mode"
-    QString currentPath = cfg.startPath;
-    bool isCustomMode = false;
-    QStringList customFolders;
-    
-    // Function to check if a folder should be intercepted
+// Function definitions
     bool shouldIntercept(const QString& folderPath) {
         QString folderName = QDir(folderPath).dirName();
-        return cfg.interceptedFolders.contains(folderName);
+    return g_cfg.interceptedFolders.contains(folderName);
     }
     
-    // Function to switch to custom view
     void enterCustomMode(const QString& path) {
-        customFolders = readCustomFolderList(cfg.customListFilePath);
-        QStringListModel *model = qobject_cast<QStringListModel*>(customModel);
-        if (model) {
-            model->setStringList(customFolders);
-        }
-        view->setModel(customModel);
-        isCustomMode = true;
-        currentPath = path;
-        pathBar->setText(path + " [CUSTOM VIEW]");
-        statusLabel->setText(QString("Custom view: showing %1 folders from list").arg(customFolders.size()));
+    g_customFolders = readCustomFolderList(g_cfg.customListFilePath);
+    g_customModel->setStringList(g_customFolders);
+    g_view->setModel(g_customModel);
+    g_isCustomMode = true;
+    g_currentPath = path;
+    g_pathBar->setText(path + " [CUSTOM VIEW]");
+    g_statusLabel->setText(QString("Custom view: showing %1 folders from list").arg(g_customFolders.size()));
     }
     
-    // Function to switch to normal filesystem view
     void enterNormalMode(const QString& path) {
-        QModelIndex idx = fsModel->index(path);
+    QModelIndex idx = g_fsModel->index(path);
         if (idx.isValid()) {
-            view->setModel(fsModel);
-            view->setRootIndex(idx);
-            isCustomMode = false;
-            currentPath = path;
-            pathBar->setText(path);
-            statusLabel->setText("Browsing: " + path);
+        g_view->setModel(g_fsModel);
+        g_view->setRootIndex(idx);
+        g_isCustomMode = false;
+        g_currentPath = path;
+        g_pathBar->setText(path);
+        g_statusLabel->setText("Browsing: " + path);
         } else {
-            statusLabel->setText("Cannot access: " + path);
+        g_statusLabel->setText("Cannot access: " + path);
         }
     }
     
-    // Function to change directory with interception logic
     void changeDirectory(const QString& path) {
         QDir targetDir(path);
         QString canonicalPath = targetDir.canonicalPath();
@@ -168,6 +140,41 @@ int main(int argc, char *argv[]) {
             enterNormalMode(canonicalPath);
         }
     }
+
+int main(int argc, char *argv[]) {
+    // Create the Qt Application object
+    QApplication app(argc, argv);
+
+    g_cfg = readConfig();
+    
+    // Create the main window
+    QMainWindow mainWindow;
+    mainWindow.setWindowTitle("Folder Browser for Proton");
+    mainWindow.resize(800, 600);
+
+    // Real file system model (for normal browsing)
+    g_fsModel = new QFileSystemModel();
+    g_fsModel->setRootPath(g_cfg.startPath);
+    g_fsModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
+    
+    // String list model (for custom folder lists)
+    g_customModel = new QStringListModel();
+    
+    // List view widget
+    g_view = new QListView();
+    // Set the view to show icons like a file manager
+    g_view->setViewMode(QListView::IconMode);
+    // Adjust layout when window is resized
+    g_view->setResizeMode(QListView::Adjust);
+    g_view->setGridSize(QSize(100, 100));
+    g_view->setIconSize(QSize(64, 64));
+
+    // Navigation widgets
+    g_pathBar = new QLineEdit();
+    
+    QPushButton *goButton = new QPushButton("Go");
+    QPushButton *upButton = new QPushButton("Up");
+    g_statusLabel = new QLabel("Ready");
     
     // Connect signals
     QObject::connect(view, &QListView::doubleClicked, [&](const QModelIndex &index) {
