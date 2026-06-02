@@ -4,6 +4,43 @@
 #include <QListView>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QDir>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QDebug>
+#include <QMessageBox>
+
+QString readConfigPath() {
+    // Look for config file in several locations
+    QStringList configPaths = {
+        QDir::homePath() + "/.config/folderbrowser/config.json",
+        QDir::homePath() + "/folderbrowser_config.json",
+        QCoreApplication::applicationDirPath() + "/config.json"
+    };
+    
+    for (const QString& configPath : configPaths) {
+        QFile file(configPath);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray data = file.readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QJsonObject obj = doc.object();
+            
+            if (obj.contains("folder_path")) {
+                QString path = obj["folder_path"].toString();
+                if (QDir(path).exists()) {
+                    qDebug() << "Loaded config from:" << configPath;
+                    qDebug() << "Folder path:" << path;
+                    return path;
+                }
+            }
+        }
+    }
+    
+    // Fallback to home directory if config not found
+    qDebug() << "Config not found, using home directory";
+    return QDir::homePath();
+}
 
 int main(int argc, char *argv[]) {
     // 1. Create the Qt Application object
