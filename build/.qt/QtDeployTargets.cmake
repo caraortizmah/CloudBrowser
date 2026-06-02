@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_FolderBrowser_FILE /home/caom/Git_repositories/Development/FolderBrowser/build/FolderBrowser)
+set(__QT_DEPLOY_TARGET_FolderBrowser_TYPE EXECUTABLE)

@@ -1,0 +1,5 @@
+/home/caom/Git_repositories/Development/FolderBrowser/build/CMakeFiles/FolderBrowser.dir
+/home/caom/Git_repositories/Development/FolderBrowser/build/CMakeFiles/edit_cache.dir
+/home/caom/Git_repositories/Development/FolderBrowser/build/CMakeFiles/rebuild_cache.dir
+/home/caom/Git_repositories/Development/FolderBrowser/build/CMakeFiles/FolderBrowser_autogen_timestamp_deps.dir
+/home/caom/Git_repositories/Development/FolderBrowser/build/CMakeFiles/FolderBrowser_autogen.dir

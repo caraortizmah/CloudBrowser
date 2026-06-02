@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/FolderBrowser.dir/link.d CMakeFiles/FolderBrowser.dir/FolderBrowser_autogen/mocs_compilation.cpp.o CMakeFiles/FolderBrowser.dir/main.cpp.o -o FolderBrowser  /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.10.2
