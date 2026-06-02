@@ -1,0 +1,3 @@
+/media/rclone_mount_folder/Documents/folder_to_connect_1
+/media/rclone_mount_folder/Documents/folder_to_connect_2
+/media/rclone_mount_folder/Pictures/folder_to_connect_3
