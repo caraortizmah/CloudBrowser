@@ -205,24 +205,49 @@ int main(int argc, char *argv[]) {
             if (fsModel->isDir(index)) {
             changeDirectory(path);
         }
+        }
     });
     
+    // Connect navigation buttons
     QObject::connect(goButton, &QPushButton::clicked, [&]() {
         changeDirectory(pathBar->text());
     });
     
     QObject::connect(upButton, &QPushButton::clicked, [&]() {
-        QDir current(pathBar->text());
+        if (isCustomMode) {
+            // Up from custom view goes to parent directory
+            QDir parent(currentPath);
+            parent.cdUp();
+            changeDirectory(parent.absolutePath());
+        } else {
+            QDir current(currentPath);
         current.cdUp();
         changeDirectory(current.absolutePath());
+        }
     });
     
     QObject::connect(pathBar, &QLineEdit::returnPressed, [&]() {
         changeDirectory(pathBar->text());
     });
     
+    // Layout
+    QWidget *centralWidget = new QWidget();
+    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+    QHBoxLayout *navLayout = new QHBoxLayout();
+    
+    navLayout->addWidget(upButton);
+    navLayout->addWidget(pathBar);
+    navLayout->addWidget(goButton);
+    
+    mainLayout->addLayout(navLayout);
+    mainLayout->addWidget(view);
+    mainLayout->addWidget(statusLabel);
+    
     mainWindow.setCentralWidget(centralWidget);
 
+    // Start at initial path
+    changeDirectory(cfg.startPath);
+    
     // Show the window and start the event loop
     mainWindow.show();
     return app.exec();
