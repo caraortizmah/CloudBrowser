@@ -46,7 +46,7 @@ Config readConfig() {
             
             if (obj.contains("folder_path")) {
                 cfg.startPath = obj["folder_path"].toString();
-	    }
+            }
             
             if (obj.contains("intercept_folders") && obj["intercept_folders"].isArray()) {
                 QJsonArray arr = obj["intercept_folders"].toArray();
@@ -62,7 +62,7 @@ Config readConfig() {
     }
     
     return cfg;
-                }
+}
 
 QStringList readCustomFolderList(const QString& filePath) {
     QStringList folders;
@@ -92,7 +92,7 @@ Config g_cfg;
 QString g_currentPath;
 bool g_isCustomMode = false;
 QStringList g_customFolders;
-    
+
 // Function declarations
 bool shouldIntercept(const QString& folderPath);
 void enterCustomMode(const QString& path);
@@ -100,12 +100,12 @@ void enterNormalMode(const QString& path);
 void changeDirectory(const QString& path);
 
 // Function definitions
-    bool shouldIntercept(const QString& folderPath) {
-        QString folderName = QDir(folderPath).dirName();
+bool shouldIntercept(const QString& folderPath) {
+    QString folderName = QDir(folderPath).dirName();
     return g_cfg.interceptedFolders.contains(folderName);
-    }
-    
-    void enterCustomMode(const QString& path) {
+}
+
+void enterCustomMode(const QString& path) {
     g_customFolders = readCustomFolderList(g_cfg.customListFilePath);
     g_customModel->setStringList(g_customFolders);
     g_view->setModel(g_customModel);
@@ -113,33 +113,33 @@ void changeDirectory(const QString& path);
     g_currentPath = path;
     g_pathBar->setText(path + " [CUSTOM VIEW]");
     g_statusLabel->setText(QString("Custom view: showing %1 folders from list").arg(g_customFolders.size()));
-    }
-    
-    void enterNormalMode(const QString& path) {
+}
+
+void enterNormalMode(const QString& path) {
     QModelIndex idx = g_fsModel->index(path);
-        if (idx.isValid()) {
+    if (idx.isValid()) {
         g_view->setModel(g_fsModel);
         g_view->setRootIndex(idx);
         g_isCustomMode = false;
         g_currentPath = path;
         g_pathBar->setText(path);
         g_statusLabel->setText("Browsing: " + path);
-        } else {
+    } else {
         g_statusLabel->setText("Cannot access: " + path);
-        }
     }
+}
+
+void changeDirectory(const QString& path) {
+    QDir targetDir(path);
+    QString canonicalPath = targetDir.canonicalPath();
     
-    void changeDirectory(const QString& path) {
-        QDir targetDir(path);
-        QString canonicalPath = targetDir.canonicalPath();
-        
-        // Check if we should intercept this folder
-        if (shouldIntercept(canonicalPath)) {
-            enterCustomMode(canonicalPath);
-        } else {
-            enterNormalMode(canonicalPath);
-        }
+    // Check if we should intercept this folder
+    if (shouldIntercept(canonicalPath)) {
+        enterCustomMode(canonicalPath);
+    } else {
+        enterNormalMode(canonicalPath);
     }
+}
 
 int main(int argc, char *argv[]) {
     // Create the Qt Application object
@@ -193,8 +193,8 @@ int main(int argc, char *argv[]) {
             // Normal mode: get path from filesystem model
             QString path = g_fsModel->filePath(index);
             if (g_fsModel->isDir(index)) {
-            changeDirectory(path);
-        }
+                changeDirectory(path);
+            }
         }
     });
     
@@ -211,8 +211,8 @@ int main(int argc, char *argv[]) {
             changeDirectory(parent.absolutePath());
         } else {
             QDir current(g_currentPath);
-        current.cdUp();
-        changeDirectory(current.absolutePath());
+            current.cdUp();
+            changeDirectory(current.absolutePath());
         }
     });
     
