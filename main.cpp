@@ -16,7 +16,6 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QStringListModel>
-#include <QListView>
 
 // Configuration structure
 struct Config {
@@ -24,6 +23,7 @@ struct Config {
     QStringList interceptedFolders;  // Folder names that trigger custom view
     QString customListFilePath;       // File containing custom folder list
 };
+
 Config readConfig() {
     // Look for config file in several locations
     Config cfg;
@@ -177,10 +177,10 @@ int main(int argc, char *argv[]) {
     g_statusLabel = new QLabel("Ready");
     
     // Connect signals
-    QObject::connect(view, &QListView::doubleClicked, [&](const QModelIndex &index) {
-        if (isCustomMode) {
+    QObject::connect(g_view, &QListView::doubleClicked, [&](const QModelIndex &index) {
+        if (g_isCustomMode) {
             // In custom mode: open the selected folder path directly
-            QString selectedPath = customFolders.value(index.row());
+            QString selectedPath = g_customFolders.value(index.row());
             if (!selectedPath.isEmpty() && QDir(selectedPath).exists()) {
                 // Check if the new path itself should be intercepted
                 if (shouldIntercept(selectedPath)) {
@@ -191,8 +191,8 @@ int main(int argc, char *argv[]) {
             }
         } else {
             // Normal mode: get path from filesystem model
-            QString path = fsModel->filePath(index);
-            if (fsModel->isDir(index)) {
+            QString path = g_fsModel->filePath(index);
+            if (g_fsModel->isDir(index)) {
             changeDirectory(path);
         }
         }
@@ -200,24 +200,24 @@ int main(int argc, char *argv[]) {
     
     // Connect navigation buttons
     QObject::connect(goButton, &QPushButton::clicked, [&]() {
-        changeDirectory(pathBar->text());
+        changeDirectory(g_pathBar->text());
     });
     
     QObject::connect(upButton, &QPushButton::clicked, [&]() {
-        if (isCustomMode) {
+        if (g_isCustomMode) {
             // Up from custom view goes to parent directory
-            QDir parent(currentPath);
+            QDir parent(g_currentPath);
             parent.cdUp();
             changeDirectory(parent.absolutePath());
         } else {
-            QDir current(currentPath);
+            QDir current(g_currentPath);
         current.cdUp();
         changeDirectory(current.absolutePath());
         }
     });
     
-    QObject::connect(pathBar, &QLineEdit::returnPressed, [&]() {
-        changeDirectory(pathBar->text());
+    QObject::connect(g_pathBar, &QLineEdit::returnPressed, [&]() {
+        changeDirectory(g_pathBar->text());
     });
     
     // Layout
@@ -226,17 +226,17 @@ int main(int argc, char *argv[]) {
     QHBoxLayout *navLayout = new QHBoxLayout();
     
     navLayout->addWidget(upButton);
-    navLayout->addWidget(pathBar);
+    navLayout->addWidget(g_pathBar);
     navLayout->addWidget(goButton);
     
     mainLayout->addLayout(navLayout);
-    mainLayout->addWidget(view);
-    mainLayout->addWidget(statusLabel);
+    mainLayout->addWidget(g_view);
+    mainLayout->addWidget(g_statusLabel);
     
     mainWindow.setCentralWidget(centralWidget);
 
     // Start at initial path
-    changeDirectory(cfg.startPath);
+    changeDirectory(g_cfg.startPath);
     
     // Show the window and start the event loop
     mainWindow.show();
