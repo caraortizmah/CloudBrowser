@@ -9,12 +9,21 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDebug>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
+#include <QStringListModel>
+#include <QListView>
 
+// Configuration structure
+struct Config {
+    QString startPath;
+    QStringList interceptedFolders;  // Folder names that trigger custom view
+    QString customListFilePath;       // File containing custom folder list
+};
 QString readConfigPath() {
     // Look for config file in several locations
     QStringList configPaths = {
