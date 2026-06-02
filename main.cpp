@@ -86,21 +86,22 @@ int main(int argc, char *argv[]) {
     // Create the Qt Application object
     QApplication app(argc, argv);
 
-    QString startPath = readConfigPath();
+    Config cfg = readConfig();
     
     // Create the main window
     QMainWindow mainWindow;
     mainWindow.setWindowTitle("Folder Broser for proton - " + startPath);
     mainWindow.resize(800, 600);
 
-    // Create the file system model
-    QFileSystemModel *model = new QFileSystemModel();
+    // Real file system model (for normal browsing)
+    QFileSystemModel *fsModel = new QFileSystemModel();
+    fsModel->setRootPath(cfg.startPath);
+    fsModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
 
-    // Set the root path to watch (user's home directory)
-    model->setRootPath(startPath);
-    model->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
-
-    // Create the list view and set the model
+    // String list model (for custom folder lists)
+    QStringListModel *customModel = new QStringListModel();
+    
+    // List view widget
     QListView *view = new QListView();
     view->setModel(model);
     // Set the view to show icons like a file manager
