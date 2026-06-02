@@ -188,8 +188,21 @@ int main(int argc, char *argv[]) {
     
     // Connect signals
     QObject::connect(view, &QListView::doubleClicked, [&](const QModelIndex &index) {
-        QString path = model->filePath(index);
-        if (model->isDir(index)) {
+        if (isCustomMode) {
+            // In custom mode: open the selected folder path directly
+            QString selectedPath = customFolders.value(index.row());
+            if (!selectedPath.isEmpty() && QDir(selectedPath).exists()) {
+                // Check if the new path itself should be intercepted
+                if (shouldIntercept(selectedPath)) {
+                    enterCustomMode(selectedPath);
+                } else {
+                    enterNormalMode(selectedPath);
+                }
+            }
+        } else {
+            // Normal mode: get path from filesystem model
+            QString path = fsModel->filePath(index);
+            if (fsModel->isDir(index)) {
             changeDirectory(path);
         }
     });
